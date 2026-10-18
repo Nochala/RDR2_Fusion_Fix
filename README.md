@@ -1,2 +1,2 @@
-# Gameplay_Fixes_RedDeadRedemption2
+# RedDeadRedemption2_Gameplay_Fixes
 Various gameplay fixes and improvements for RDR2.
