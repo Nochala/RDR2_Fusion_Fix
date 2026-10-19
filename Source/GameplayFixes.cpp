@@ -1,5 +1,5 @@
 #include "GameplayFixes.h"
-#include "Logger.h"
+#include "../Headers/Logger.h"
 #include "Main/Headers/Modules.h"
 #include <windows.h>
 #include <algorithm>
@@ -8,6 +8,7 @@
 namespace
 {
     GameplayFixes::Settings settings;
+    INIT_ONCE earlyInitialization = INIT_ONCE_STATIC_INIT;
 
     std::wstring GetIniPath()
     {
@@ -79,10 +80,30 @@ namespace
             success = WriteIniValue(path, L"General", L"Logging", L"true", "General.Logging") && success;
 
         existing[0] = L'\0';
-        GetPrivateProfileStringW(L"Startup", L"SkipIntroSplashesAndLegal", L"", existing, 8, path.c_str());
+        GetPrivateProfileStringW(L"Debug", L"Enabled", L"", existing, 8, path.c_str());
         if (existing[0] == L'\0')
-            success = WriteIniValue(path, L"Startup", L"SkipIntroSplashesAndLegal", L"true",
-                "Startup.SkipIntroSplashesAndLegal") && success;
+            success = WriteIniValue(path, L"Debug", L"Enabled", L"true", "Debug.Enabled") && success;
+
+        wchar_t legacy[16] = {};
+        GetPrivateProfileStringW(L"Startup", L"SkipIntroSplashesAndLegal", L"", legacy, 16, path.c_str());
+        const wchar_t* inherited = legacy[0] == L'\0' ? L"true" :
+            ReadIniBoolean(path, L"Startup", L"SkipIntroSplashesAndLegal", true) ? L"true" : L"false";
+        const wchar_t* keys[] = { L"SkipIntroSplashes", L"SkipLegal" };
+        for (const wchar_t* key : keys)
+        {
+            existing[0] = L'\0';
+            GetPrivateProfileStringW(L"Startup", key, L"", existing, 8, path.c_str());
+            if (existing[0] == L'\0')
+                success = WriteIniValue(path, L"Startup", key, inherited, "Startup skip option") && success;
+        }
+
+        if (success && legacy[0] != L'\0')
+        {
+            if (WritePrivateProfileStringW(L"Startup", L"SkipIntroSplashesAndLegal", nullptr, path.c_str()))
+                Logger::Log("[SUCCESS] INI: migrated SkipIntroSplashesAndLegal into separate startup options.");
+            else
+                Logger::Log("[WARNING] INI: old combined skip option could not be removed; the new options take priority.");
+        }
 
         return success;
     }
@@ -90,22 +111,24 @@ namespace
 
 namespace GameplayFixes
 {
-    void Initialize()
+    BOOL CALLBACK DoEarlyInitialization(PINIT_ONCE, PVOID, PVOID*)
     {
         const std::wstring iniPath = GetIniPath();
         if (!iniPath.empty())
             Logger::SetEnabled(ReadIniBoolean(iniPath, L"General", L"Logging", true));
 
-        Logger::LogStartup();
+        Logger::Log("[BOOT] Early startup: reading configuration before Story Mode.");
         if (!iniPath.empty())
         {
             Logger::Log("[INFO] INI: reading GameplayFixesRDR2.ini from the game directory.");
             const bool iniReady = EnsureIniExists(iniPath);
+            Logger::SetDebugEnabled(ReadIniBoolean(iniPath, L"Debug", L"Enabled", true));
             if (!iniReady)
                 Logger::Log("[WARNING] INI: some settings could not be saved; defaults may be used.");
 
             settings.enabled = ReadIniBoolean(iniPath, L"General", L"Enabled", true);
-            settings.skipIntroSplashesAndLegal = ReadIniBoolean(iniPath, L"Startup", L"SkipIntroSplashesAndLegal", true);
+            settings.skipIntroSplashes = ReadIniBoolean(iniPath, L"Startup", L"SkipIntroSplashes", true);
+            settings.skipLegal = ReadIniBoolean(iniPath, L"Startup", L"SkipLegal", true);
             const unsigned int interval = GetPrivateProfileIntW(L"General", L"UpdateIntervalMs", 250, iniPath.c_str());
             settings.updateIntervalMs = (std::min)(interval, 60000u);
             Logger::Log(iniReady ? "[SUCCESS] INI: configuration settings read." :
@@ -115,10 +138,27 @@ namespace GameplayFixes
             Logger::Log("[ERROR] INI: game directory could not be resolved; using default settings.");
 
         Logger::Log((std::string("[INFO] Settings: Enabled=") + (settings.enabled ? "true" : "false") +
-            ", Logging=true, SkipIntroSplashesAndLegal=" + (settings.skipIntroSplashesAndLegal ? "true" : "false") +
+            ", Debug=" + (Logger::IsDebugEnabled() ? "true" : "false") +
+            ", SkipIntroSplashes=" + (settings.skipIntroSplashes ? "true" : "false") +
+            ", SkipLegal=" + (settings.skipLegal ? "true" : "false") +
             ", UpdateIntervalMs=" + std::to_string(settings.updateIntervalMs) + ".").c_str());
+        Main::InitializeEarly(settings);
+        Logger::Log("[SUCCESS] Early startup: pre-Story-Mode initialization completed.");
+        return TRUE;
+    }
+
+    void InitializeEarly()
+    {
+        if (!InitOnceExecuteOnce(&earlyInitialization, DoEarlyInitialization, nullptr, nullptr))
+            Logger::Log("[ERROR] Early startup: initialization could not be completed.");
+    }
+
+    void Initialize()
+    {
+        InitializeEarly();
+        Logger::LogStartup();
         Main::Initialize(settings);
-        Logger::Log("[INFO] GameplayFixesRDR2: module initialization finished; see individual feature results above.");
+        Logger::Log("[INFO] GameplayFixesRDR2: gameplay module initialization finished.");
     }
 
     void Update()

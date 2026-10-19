@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "../Headers/Logger.h"
 #include <windows.h>
 #include <cstdio>
 #include <string>
@@ -6,6 +6,7 @@
 namespace
 {
     bool loggingEnabled = true;
+    bool debugEnabled = false;
 
     bool BuildGamePath(const wchar_t* filename, wchar_t (&path)[MAX_PATH])
     {
@@ -55,10 +56,11 @@ namespace
         return std::string(prefix) + message + "\r\n";
     }
 
-    bool Append(const wchar_t* path, const char* content, DWORD length, DWORD& error)
+    bool Append(const wchar_t* path, const char* content, DWORD length, DWORD& error, bool reset = false)
     {
-        HANDLE file = CreateFileW(path, FILE_APPEND_DATA, FILE_SHARE_READ | FILE_SHARE_WRITE,
-            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        HANDLE file = CreateFileW(path, reset ? GENERIC_WRITE : FILE_APPEND_DATA,
+            FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, reset ? CREATE_ALWAYS : OPEN_ALWAYS,
+            FILE_ATTRIBUTE_NORMAL, nullptr);
         if (file == INVALID_HANDLE_VALUE)
         {
             error = GetLastError();
@@ -100,13 +102,50 @@ namespace Logger
 
         constexpr char message[] = "[BOOT] GameplayFixesRDR2.asi loaded; waiting for ScriptMain.\r\n";
         DWORD error = ERROR_SUCCESS;
-        if (!Append(logPath, message, sizeof(message) - 1, error))
+        if (!Append(logPath, message, sizeof(message) - 1, error, true))
             OutputDebugStringA("[GameplayFixesRDR2] Cannot create game-directory log during DLL load.\n");
+    }
+
+    void LogScriptEntry()
+    {
+        wchar_t iniPath[MAX_PATH] = {};
+        if (BuildGamePath(L"GameplayFixesRDR2.ini", iniPath))
+        {
+            wchar_t value[16] = {};
+            GetPrivateProfileStringW(L"General", L"Logging", L"true", value, 16, iniPath);
+            if (IsFalse(value))
+            {
+                loggingEnabled = false;
+                return;
+            }
+        }
+
+        loggingEnabled = true;
+        Log("[BOOT] ScriptMain entry reached; starting gameplay initialization.");
     }
 
     void SetEnabled(bool enabled)
     {
         loggingEnabled = enabled;
+    }
+
+    void SetDebugEnabled(bool enabled)
+    {
+        debugEnabled = enabled;
+    }
+
+    bool IsDebugEnabled()
+    {
+        return loggingEnabled && debugEnabled;
+    }
+
+    void Debug(const char* message)
+    {
+        if (!IsDebugEnabled() || message == nullptr)
+            return;
+
+        const std::string line = std::string("[DEBUG] ") + message;
+        Log(line.c_str());
     }
 
     void Log(const char* message)

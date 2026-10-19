@@ -4,9 +4,14 @@
 
 namespace Main
 {
-    void Initialize(const GameplayFixes::Settings& settings)
+    void InitializeEarly(const GameplayFixes::Settings& settings)
     {
-        SkipIntro::Initialize(settings.enabled && settings.skipIntroSplashesAndLegal);
+        SkipIntro::Initialize(settings.enabled && settings.skipIntroSplashes,
+            settings.enabled && settings.skipLegal);
+    }
+
+    void Initialize(const GameplayFixes::Settings&)
+    {
     }
 
     void Update(const GameplayFixes::Settings&)

@@ -2,5 +2,5 @@
 
 namespace Main::SkipIntro
 {
-    void Initialize(bool enabled);
+    void Initialize(bool skipIntroSplashes, bool skipLegal);
 }
