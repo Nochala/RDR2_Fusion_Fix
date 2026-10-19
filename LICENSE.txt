@@ -1,0 +1,83 @@
+RDR2 GAMEPLAY FIXES LICENSE
+
+Copyright (c) 2026 Nochala
+All rights reserved.
+
+This license applies to the mod created by Nochala under the name "RDR2 Gameplay Fixes" and any of the following alternate names:
+
+- Gameplay Fixes RDR2
+- GameplayFixesRDR2
+- Gameplay Fixes for RDR2
+- Red Dead Redemption 2 Gameplay Fixes
+- Gameplay Fixes for Red Dead Redemption 2
+
+These names identify the same project for purposes of this license. The license also applies if Nochala later renames this project. In this document, the project and its original source code, compiled ASI files, configuration files, documentation, and other original materials are collectively referred to as the "Software."
+
+1. PERMITTED USE
+
+You may:
+
+- Download, install, and use the Software for personal, non-commercial purposes.
+- View and study the publicly available source code.
+- Compile the source code for personal, non-commercial use.
+- Modify the source code privately for personal, non-commercial use, provided the modified versions are not publicly distributed without prior written permission.
+
+These permissions are limited and do not transfer ownership of the Software or grant any rights not expressly stated here.
+
+2. RESTRICTIONS
+
+Without prior written permission from Nochala, you may NOT:
+
+- Sell, sublicense, monetize, or otherwise commercially exploit the Software or any part of it.
+- Distribute the Software through paid downloads, early-access paywalls, subscription-locked releases, Patreon-locked builds, paid mod packs, or ad-revenue-based redistribution.
+- Reupload, mirror, or publicly redistribute the Software, whether modified or unmodified, on any website, repository, service, or other platform.
+- Include the Software or any part of its source code or compiled files in public mod packs, collections, installers, or bundles.
+- Publish or distribute modified versions, forks, ports, adaptations, or other derivative works based on the Software.
+- Claim the Software, its source code, or any portion authored by Nochala as your own work.
+- Remove, obscure, replace, or misrepresent copyright notices, license terms, or author attribution.
+
+Making the source code publicly viewable does not grant permission to republish, redistribute, or commercially use it.
+
+3. AUTHORSHIP AND ATTRIBUTION
+
+The original author of the Software is:
+
+Nochala
+
+All copies and privately modified versions must preserve the original copyright, license, and attribution notices. Permission to examine, compile, or privately modify the Software does not authorize anyone to present the original work as their own or publicly distribute modifications.
+
+4. THIRD-PARTY SOFTWARE AND INTELLECTUAL PROPERTY
+
+The Software may interact with or depend on Red Dead Redemption 2, ScriptHookRDR2, third-party libraries, APIs, and other tools or game assets.
+
+This license covers only original code and materials authored by Nochala. It does not grant ownership of, or additional rights to, third-party software, game content, trademarks, or other intellectual property. Any applicable third-party licenses and terms remain in effect.
+
+Red Dead Redemption 2, Rockstar Games, Rockstar North, Take-Two Interactive, and related names, trademarks, and intellectual property belong to their respective owners.
+
+This is an unofficial fan-made modification and is not affiliated with, endorsed by, or sponsored by Rockstar Games or Take-Two Interactive.
+
+5. DISCLAIMER OF WARRANTY AND LIABILITY
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
+
+To the maximum extent permitted by applicable law, Nochala shall not be liable for crashes, data loss, corrupted saves, incompatibilities, game instability, account issues, or other damages arising from installing, compiling, modifying, or using the Software.
+
+You use the Software at your own risk.
+
+6. PERMISSION REQUESTS
+
+Prior written permission from Nochala is required for public redistribution, publication of modified versions or forks, inclusion in publicly distributed bundles or mod packs, commercial use, or any other use not expressly permitted above.
+
+Author: Nochala
+
+Permission is not implied merely because the Software or its source code is publicly accessible.
+
+PLAIN-ENGLISH SUMMARY
+
+You may download, install, use, study, and privately compile or modify this mod for non-commercial purposes.
+
+You may not make money from it, claim it as your own, reupload it, include it in public mod packs, or release modified versions without prior written permission from Nochala.
+
+Always preserve credit to Nochala.
+
+This summary is for convenience; the numbered terms above control if there is any inconsistency.
