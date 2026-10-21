@@ -19,6 +19,6 @@ void ScriptMain()
             Logger::Log("[SUCCESS] ScriptMain completed its first update.");
             firstUpdate = false;
         }
-        WAIT(GameplayFixes::GetUpdateIntervalMs());
+        WAIT(GameplayFixes::GetUpdateDelay());
     }
 }

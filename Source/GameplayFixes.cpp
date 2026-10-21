@@ -1,8 +1,8 @@
 #include "GameplayFixes.h"
 #include "../Headers/Logger.h"
 #include "Main/Headers/Modules.h"
+#include "Main/Headers/NativeDiagnostics.h"
 #include <windows.h>
-#include <algorithm>
 #include <string>
 
 namespace
@@ -64,7 +64,6 @@ namespace
                     std::to_string(error) + ").").c_str());
 
             success = WriteIniValue(path, L"General", L"Enabled", L"true", "General.Enabled") && success;
-            success = WriteIniValue(path, L"General", L"UpdateIntervalMs", L"250", "General.UpdateIntervalMs") && success;
             if (success)
                 Logger::Log("[SUCCESS] INI: created default configuration.");
         }
@@ -80,9 +79,83 @@ namespace
             success = WriteIniValue(path, L"General", L"Logging", L"true", "General.Logging") && success;
 
         existing[0] = L'\0';
-        GetPrivateProfileStringW(L"Debug", L"Enabled", L"", existing, 8, path.c_str());
+        GetPrivateProfileStringW(L"General", L"DebugLogging", L"", existing, 8, path.c_str());
         if (existing[0] == L'\0')
-            success = WriteIniValue(path, L"Debug", L"Enabled", L"true", "Debug.Enabled") && success;
+            success = WriteIniValue(path, L"General", L"DebugLogging", L"false", "General.DebugLogging") && success;
+
+        existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Visual", L"RemoveBlackBars", L"", existing, 8, path.c_str());
+        if (existing[0] == L'\0')
+            success = WriteIniValue(path, L"Visual", L"RemoveBlackBars", L"false", "Visual.RemoveBlackBars") && success;
+
+        wchar_t previousCameraFade[16] = {};
+        GetPrivateProfileStringW(L"Camera", L"RemoveCameraFade", L"", previousCameraFade, 16, path.c_str());
+        existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Visual", L"RemoveCameraFade", L"", existing, 8, path.c_str());
+        bool visualCameraFadeReady = existing[0] != L'\0';
+        if (!visualCameraFadeReady)
+        {
+            const wchar_t* value = previousCameraFade[0] == L'\0' ? L"false" :
+                ReadIniBoolean(path, L"Camera", L"RemoveCameraFade", false) ? L"true" : L"false";
+            visualCameraFadeReady = WriteIniValue(path, L"Visual", L"RemoveCameraFade", value, "Visual.RemoveCameraFade");
+            success = visualCameraFadeReady && success;
+        }
+        if (visualCameraFadeReady && previousCameraFade[0] != L'\0')
+        {
+            if (WritePrivateProfileStringW(L"Camera", L"RemoveCameraFade", nullptr, path.c_str()))
+            {
+                wchar_t remaining[256] = {};
+                if (GetPrivateProfileSectionW(L"Camera", remaining, 256, path.c_str()) == 0)
+                    WritePrivateProfileStringW(L"Camera", nullptr, nullptr, path.c_str());
+                Logger::Log("[SUCCESS] INI: moved RemoveCameraFade from Camera to Visual.");
+            }
+            else
+            {
+                Logger::Log("[WARNING] INI: could not remove obsolete Camera.RemoveCameraFade setting.");
+                success = false;
+            }
+        }
+
+        existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Diagnostics", L"DumpNativeHashes", L"", existing, 8, path.c_str());
+        if (existing[0] == L'\0')
+            success = WriteIniValue(path, L"Diagnostics", L"DumpNativeHashes", L"false", "Diagnostics.DumpNativeHashes") && success;
+
+        existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Diagnostics", L"TraceCameraNatives", L"", existing, 8, path.c_str());
+        if (existing[0] == L'\0')
+            success = WriteIniValue(path, L"Diagnostics", L"TraceCameraNatives", L"false", "Diagnostics.TraceCameraNatives") && success;
+
+        wchar_t obsoleteInterval[16] = {};
+        GetPrivateProfileStringW(L"General", L"UpdateIntervalMs", L"__missing__", obsoleteInterval, 16, path.c_str());
+        if (CompareStringOrdinal(obsoleteInterval, -1, L"__missing__", -1, TRUE) != CSTR_EQUAL)
+        {
+            if (WritePrivateProfileStringW(L"General", L"UpdateIntervalMs", nullptr, path.c_str()))
+                Logger::Log("[SUCCESS] INI: obsolete UpdateIntervalMs setting removed.");
+            else
+            {
+                Logger::Log("[WARNING] INI: could not remove obsolete UpdateIntervalMs setting.");
+                success = false;
+            }
+        }
+
+        wchar_t obsoleteDebug[16] = {};
+        GetPrivateProfileStringW(L"Debug", L"Enabled", L"__missing__", obsoleteDebug, 16, path.c_str());
+        if (CompareStringOrdinal(obsoleteDebug, -1, L"__missing__", -1, TRUE) != CSTR_EQUAL)
+        {
+            if (WritePrivateProfileStringW(L"Debug", L"Enabled", nullptr, path.c_str()))
+            {
+                wchar_t remaining[256] = {};
+                if (GetPrivateProfileSectionW(L"Debug", remaining, 256, path.c_str()) == 0)
+                    WritePrivateProfileStringW(L"Debug", nullptr, nullptr, path.c_str());
+                Logger::Log("[SUCCESS] INI: obsolete Debug.Enabled setting removed.");
+            }
+            else
+            {
+                Logger::Log("[WARNING] INI: could not remove obsolete Debug.Enabled setting.");
+                success = false;
+            }
+        }
 
         wchar_t legacy[16] = {};
         GetPrivateProfileStringW(L"Startup", L"SkipIntroSplashesAndLegal", L"", legacy, 16, path.c_str());
@@ -95,6 +168,36 @@ namespace
             GetPrivateProfileStringW(L"Startup", key, L"", existing, 8, path.c_str());
             if (existing[0] == L'\0')
                 success = WriteIniValue(path, L"Startup", key, inherited, "Startup skip option") && success;
+        }
+
+        existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Startup", L"StraightToStoryMode", L"", existing, 8, path.c_str());
+        if (existing[0] == L'\0')
+            success = WriteIniValue(path, L"Startup", L"StraightToStoryMode", L"false", "Startup.StraightToStoryMode") && success;
+
+        wchar_t obsoleteValue[16] = {};
+        GetPrivateProfileStringW(L"Startup", L"FastStoryModeLoading", L"__missing__", obsoleteValue, 16, path.c_str());
+        if (CompareStringOrdinal(obsoleteValue, -1, L"__missing__", -1, TRUE) != CSTR_EQUAL)
+        {
+            if (WritePrivateProfileStringW(L"Startup", L"FastStoryModeLoading", nullptr, path.c_str()))
+                Logger::Log("[SUCCESS] INI: obsolete FastStoryModeLoading setting removed.");
+            else
+            {
+                Logger::Log("[WARNING] INI: could not remove obsolete FastStoryModeLoading setting.");
+                success = false;
+            }
+        }
+
+        GetPrivateProfileStringW(L"Startup", L"RemoveOnlineTab", L"__missing__", obsoleteValue, 16, path.c_str());
+        if (CompareStringOrdinal(obsoleteValue, -1, L"__missing__", -1, TRUE) != CSTR_EQUAL)
+        {
+            if (WritePrivateProfileStringW(L"Startup", L"RemoveOnlineTab", nullptr, path.c_str()))
+                Logger::Log("[SUCCESS] INI: obsolete RemoveOnlineTab setting removed.");
+            else
+            {
+                Logger::Log("[WARNING] INI: could not remove the obsolete RemoveOnlineTab setting.");
+                success = false;
+            }
         }
 
         if (success && legacy[0] != L'\0')
@@ -122,15 +225,18 @@ namespace GameplayFixes
         {
             Logger::Log("[INFO] INI: reading GameplayFixesRDR2.ini from the game directory.");
             const bool iniReady = EnsureIniExists(iniPath);
-            Logger::SetDebugEnabled(ReadIniBoolean(iniPath, L"Debug", L"Enabled", true));
+            Logger::SetDebugEnabled(ReadIniBoolean(iniPath, L"General", L"DebugLogging", false));
             if (!iniReady)
                 Logger::Log("[WARNING] INI: some settings could not be saved; defaults may be used.");
 
             settings.enabled = ReadIniBoolean(iniPath, L"General", L"Enabled", true);
             settings.skipIntroSplashes = ReadIniBoolean(iniPath, L"Startup", L"SkipIntroSplashes", true);
             settings.skipLegal = ReadIniBoolean(iniPath, L"Startup", L"SkipLegal", true);
-            const unsigned int interval = GetPrivateProfileIntW(L"General", L"UpdateIntervalMs", 250, iniPath.c_str());
-            settings.updateIntervalMs = (std::min)(interval, 60000u);
+            settings.straightToStoryMode = ReadIniBoolean(iniPath, L"Startup", L"StraightToStoryMode", false);
+            settings.removeBlackBars = ReadIniBoolean(iniPath, L"Visual", L"RemoveBlackBars", false);
+            settings.removeCameraFade = ReadIniBoolean(iniPath, L"Visual", L"RemoveCameraFade", false);
+            settings.dumpNativeHashes = ReadIniBoolean(iniPath, L"Diagnostics", L"DumpNativeHashes", false);
+            settings.traceCameraNatives = ReadIniBoolean(iniPath, L"Diagnostics", L"TraceCameraNatives", false);
             Logger::Log(iniReady ? "[SUCCESS] INI: configuration settings read." :
                 "[WARNING] INI: settings read attempted with configuration errors; defaults may be in use.");
         }
@@ -138,10 +244,14 @@ namespace GameplayFixes
             Logger::Log("[ERROR] INI: game directory could not be resolved; using default settings.");
 
         Logger::Log((std::string("[INFO] Settings: Enabled=") + (settings.enabled ? "true" : "false") +
-            ", Debug=" + (Logger::IsDebugEnabled() ? "true" : "false") +
+            ", DebugLogging=" + (Logger::IsDebugEnabled() ? "true" : "false") +
             ", SkipIntroSplashes=" + (settings.skipIntroSplashes ? "true" : "false") +
             ", SkipLegal=" + (settings.skipLegal ? "true" : "false") +
-            ", UpdateIntervalMs=" + std::to_string(settings.updateIntervalMs) + ".").c_str());
+            ", StraightToStoryMode=" + (settings.straightToStoryMode ? "true" : "false") +
+            ", RemoveBlackBars=" + (settings.removeBlackBars ? "true" : "false") +
+            ", RemoveCameraFade=" + (settings.removeCameraFade ? "true" : "false") +
+            ", DumpNativeHashes=" + (settings.dumpNativeHashes ? "true" : "false") +
+            ", TraceCameraNatives=" + (settings.traceCameraNatives ? "true" : "false") + ".").c_str());
         Main::InitializeEarly(settings);
         Logger::Log("[SUCCESS] Early startup: pre-Story-Mode initialization completed.");
         return TRUE;
@@ -167,8 +277,9 @@ namespace GameplayFixes
             Main::Update(settings);
     }
 
-    unsigned int GetUpdateIntervalMs()
+    unsigned int GetUpdateDelay()
     {
-        return settings.updateIntervalMs;
+        return settings.enabled && (Main::NativeDiagnostics::IsCameraTraceActive() ||
+            (settings.removeCameraFade && Logger::IsDebugEnabled())) ? 16U : 250U;
     }
 }
