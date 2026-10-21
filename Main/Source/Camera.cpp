@@ -3,11 +3,14 @@
 #include "main.h"
 #include <windows.h>
 #include <cstdint>
+#include <cstring>
 
 namespace
 {
     constexpr std::uint64_t isPlayerControlOn = 0x7964097FCE4C244BULL;
     constexpr std::uint64_t isGameplayCamRendering = 0x8660EA714834E412ULL;
+    constexpr std::uint64_t isGameplayCamShaking = 0xEA4C5F4AA0A4DBEFULL;
+    constexpr std::uint64_t setGameplayCamShakeAmplitude = 0x570E35F5C4A44838ULL;
     constexpr std::uint64_t isInCinematicMode = 0x74F1D22EFA71FAB8ULL;
     constexpr std::uint64_t isCinematicCamRendering = 0xBF7C780731AADBF8ULL;
     constexpr std::uint64_t isControlPressed = 0xF3A21BCD95725A4AULL;
@@ -20,6 +23,7 @@ namespace
     constexpr ULONGLONG manualCameraAllowanceMs = 3000;
 
     bool enabled = false;
+    bool shakeReductionEnabled = false;
     ULONGLONG nextVehicleRefresh = 0;
     ULONGLONG manualCameraAllowanceUntil = 0;
 
@@ -42,27 +46,48 @@ namespace
         nativeInit(hash);
         nativeCall();
     }
+
+    void ReduceShake()
+    {
+        const float amplitude = 0.35f;
+        std::uint32_t bits = 0;
+        static_assert(sizeof(bits) == sizeof(amplitude));
+        std::memcpy(&bits, &amplitude, sizeof(bits));
+        nativeInit(setGameplayCamShakeAmplitude);
+        nativePush64(bits);
+        nativeCall();
+    }
 }
 
 namespace Main::Camera
 {
-    void Initialize(bool active)
+    void Initialize(bool active, bool reduceCameraShake)
     {
         enabled = active;
+        shakeReductionEnabled = reduceCameraShake;
         nextVehicleRefresh = 0;
         manualCameraAllowanceUntil = 0;
         if (enabled)
             Logger::Log("[INFO] DisableIdleCamera: idle cinematic camera suppression enabled.");
+        if (shakeReductionEnabled)
+            Logger::Log("[INFO] ReduceCameraShake: gameplay camera shake amplitude reduction enabled.");
     }
 
     void Update()
     {
-        if (!enabled)
+        if (!enabled && !shakeReductionEnabled)
             return;
 
         nativeInit(isPlayerControlOn);
         nativePush64(0);
         if (*nativeCall() == 0 || !InvokeBoolean(isGameplayCamRendering))
+            return;
+
+        if (shakeReductionEnabled && !InvokeBoolean(isInCinematicMode) &&
+            !InvokeBoolean(isCinematicCamRendering) && InvokeBoolean(isGameplayCamShaking))
+            ReduceShake();
+
+        if (!enabled)
             return;
 
         const ULONGLONG now = GetTickCount64();

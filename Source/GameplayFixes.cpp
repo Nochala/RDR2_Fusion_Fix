@@ -90,6 +90,7 @@ namespace
         const wchar_t* obsoleteCameraSettings[][2] =
         {
             { L"Visual", L"RemoveCameraFade" },
+            { L"Visual", L"DisableCameraSmoothing" },
             { L"Camera", L"RemoveCameraFade" },
             { L"Diagnostics", L"TraceCameraNatives" }
         };
@@ -119,9 +120,9 @@ namespace
             success = WriteIniValue(path, L"Visual", L"DisableIdleCamera", L"false", "Visual.DisableIdleCamera") && success;
 
         existing[0] = L'\0';
-        GetPrivateProfileStringW(L"Visual", L"DisableCameraSmoothing", L"", existing, 8, path.c_str());
+        GetPrivateProfileStringW(L"Visual", L"ReduceCameraShake", L"", existing, 8, path.c_str());
         if (existing[0] == L'\0')
-            success = WriteIniValue(path, L"Visual", L"DisableCameraSmoothing", L"false", "Visual.DisableCameraSmoothing") && success;
+            success = WriteIniValue(path, L"Visual", L"ReduceCameraShake", L"false", "Visual.ReduceCameraShake") && success;
 
         existing[0] = L'\0';
         GetPrivateProfileStringW(L"Diagnostics", L"DumpNativeHashes", L"", existing, 8, path.c_str());
@@ -237,7 +238,7 @@ namespace GameplayFixes
             settings.straightToStoryMode = ReadIniBoolean(iniPath, L"Startup", L"StraightToStoryMode", false);
             settings.removeBlackBars = ReadIniBoolean(iniPath, L"Visual", L"RemoveBlackBars", false);
             settings.disableIdleCamera = ReadIniBoolean(iniPath, L"Visual", L"DisableIdleCamera", false);
-            settings.disableCameraSmoothing = ReadIniBoolean(iniPath, L"Visual", L"DisableCameraSmoothing", false);
+            settings.reduceCameraShake = ReadIniBoolean(iniPath, L"Visual", L"ReduceCameraShake", false);
             settings.dumpNativeHashes = ReadIniBoolean(iniPath, L"Diagnostics", L"DumpNativeHashes", false);
             Logger::Log(iniReady ? "[SUCCESS] INI: configuration settings read." :
                 "[WARNING] INI: settings read attempted with configuration errors; defaults may be in use.");
@@ -252,7 +253,7 @@ namespace GameplayFixes
             ", StraightToStoryMode=" + (settings.straightToStoryMode ? "true" : "false") +
             ", RemoveBlackBars=" + (settings.removeBlackBars ? "true" : "false") +
             ", DisableIdleCamera=" + (settings.disableIdleCamera ? "true" : "false") +
-            ", DisableCameraSmoothing=" + (settings.disableCameraSmoothing ? "true" : "false") +
+            ", ReduceCameraShake=" + (settings.reduceCameraShake ? "true" : "false") +
             ", DumpNativeHashes=" + (settings.dumpNativeHashes ? "true" : "false") +
             ".").c_str());
         Main::InitializeEarly(settings);
@@ -282,6 +283,6 @@ namespace GameplayFixes
 
     unsigned int GetUpdateDelay()
     {
-        return settings.enabled && settings.disableIdleCamera ? 0U : 250U;
+        return settings.enabled && (settings.disableIdleCamera || settings.reduceCameraShake) ? 0U : 250U;
     }
 }

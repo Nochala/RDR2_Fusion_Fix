@@ -10,7 +10,7 @@ namespace GameplayFixes
         bool straightToStoryMode = false;
         bool removeBlackBars = false;
         bool disableIdleCamera = false;
-        bool disableCameraSmoothing = false;
+        bool reduceCameraShake = false;
         bool dumpNativeHashes = false;
     };
 
