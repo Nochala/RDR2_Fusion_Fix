@@ -11,7 +11,6 @@ A collection of various gameplay fixes and improvements for RDR2.
 ### [ Visual ]
 - RemoveBlackBars
 - DisableIdleCamera
-- DisableCameraSmoothing
 - ReduceCameraShake
 - DisableFirstPersonHeadBob
 - DisableVignette
