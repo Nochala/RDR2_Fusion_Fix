@@ -5,6 +5,5 @@ A collection of various gameplay fixes and improvements for RDR2.
 ### [ Startup ]
 - SkipIntroSplashes
 - SkipLegal
-- RemoveOnlineTab
 - StraightToStoryMode 
 - FastLoadingScreens
