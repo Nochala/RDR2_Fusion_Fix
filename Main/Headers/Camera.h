@@ -2,6 +2,6 @@
 
 namespace Main::Camera
 {
-    void Initialize(bool removeCameraFade);
+    void Initialize(bool disableIdleCamera);
     void Update();
 }

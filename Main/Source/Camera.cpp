@@ -3,130 +3,90 @@
 #include "main.h"
 #include <windows.h>
 #include <cstdint>
-#include <cstdio>
 
 namespace
 {
-    constexpr std::uint64_t kFirstPersonMode = 0xD1BA66940E94C547ULL;
-    constexpr std::uint64_t kGameplayCameraRendering = 0x8660EA714834E412ULL;
-    constexpr std::uint64_t kPlayerId = 0x217E9DC48139933DULL;
-    constexpr std::uint64_t kPlayerControlOn = 0x7964097FCE4C244BULL;
-    constexpr std::uint64_t kScreenFadedIn = 0x37F9A426FBCF4AF2ULL;
-    constexpr std::uint64_t kScreenFadedOut = 0xF5472C80DF2FF847ULL;
-    constexpr std::uint64_t kScreenFadingOut = 0x02F39BEFE7B88D00ULL;
-    constexpr std::uint64_t kScreenFadingIn = 0x0CECCC63FFA2EF24ULL;
+    constexpr std::uint64_t isPlayerControlOn = 0x7964097FCE4C244BULL;
+    constexpr std::uint64_t isGameplayCamRendering = 0x8660EA714834E412ULL;
+    constexpr std::uint64_t isInCinematicMode = 0x74F1D22EFA71FAB8ULL;
+    constexpr std::uint64_t isCinematicCamRendering = 0xBF7C780731AADBF8ULL;
+    constexpr std::uint64_t isControlPressed = 0xF3A21BCD95725A4AULL;
+    constexpr std::uint64_t disableCinematicModeThisFrame = 0x8910C24B7E0046ECULL;
+    constexpr std::uint64_t invalidateCinematicVehicleIdleMode = 0x634F4A0562CF19B8ULL;
+    constexpr std::uint32_t cinematicCameraControl = 0x620A6C5E;
+    constexpr std::uint32_t cinematicCameraHoldControl = 0xD7E7B375;
+    constexpr DWORD inactiveThresholdMs = 15000;
+    constexpr ULONGLONG vehicleRefreshMs = 1000;
+    constexpr ULONGLONG manualCameraAllowanceMs = 3000;
 
-    bool removeFadeEnabled = false;
-    bool hadCameraState = false;
-    bool wasFirstPerson = false;
-    ULONGLONG fadeProbeEnd = 0;
-    unsigned int fadeProbeSamples = 0;
-    unsigned int fadeProbeStates = 0;
+    bool enabled = false;
+    ULONGLONG nextVehicleRefresh = 0;
+    ULONGLONG manualCameraAllowanceUntil = 0;
 
-    std::uint64_t NativeValue(std::uint64_t hash)
+    bool InvokeBoolean(std::uint64_t hash)
     {
         nativeInit(hash);
-        return *nativeCall();
+        return *nativeCall() != 0;
     }
 
-    bool NativeBoolean(std::uint64_t hash)
+    bool ControlPressed(std::uint32_t control)
     {
-        return static_cast<std::uint32_t>(NativeValue(hash)) != 0;
+        nativeInit(isControlPressed);
+        nativePush64(0);
+        nativePush64(control);
+        return *nativeCall() != 0;
     }
 
-    bool PlayerHasControl()
+    void Invoke(std::uint64_t hash)
     {
-        nativeInit(kPlayerId);
-        const std::uint64_t player = *nativeCall();
-        nativeInit(kPlayerControlOn);
-        nativePush64(player);
-        return static_cast<std::uint32_t>(*nativeCall()) != 0;
-    }
-
-    void FinishFadeProbe()
-    {
-        if (fadeProbeEnd == 0)
-            return;
-
-        char message[225] = {};
-        std::snprintf(message, sizeof(message),
-            "Camera: perspective-switch fade states; samples=%u, fadedIn=%s, fadedOut=%s, fadingIn=%s, fadingOut=%s.",
-            fadeProbeSamples,
-            (fadeProbeStates & 1) ? "true" : "false",
-            (fadeProbeStates & 2) ? "true" : "false",
-            (fadeProbeStates & 4) ? "true" : "false",
-            (fadeProbeStates & 8) ? "true" : "false");
-        Logger::Debug(message);
-        fadeProbeEnd = 0;
-        fadeProbeSamples = 0;
-        fadeProbeStates = 0;
+        nativeInit(hash);
+        nativeCall();
     }
 }
 
 namespace Main::Camera
 {
-    void Initialize(bool removeCameraFade)
+    void Initialize(bool active)
     {
-        removeFadeEnabled = removeCameraFade;
-        hadCameraState = false;
-        fadeProbeEnd = 0;
-        fadeProbeSamples = 0;
-        fadeProbeStates = 0;
-
-        if (removeFadeEnabled)
-        {
-            Logger::Log("[WARNING] Camera: RemoveCameraFade is not yet effective; native screen-fade cancellation is disabled while the flash effect is investigated.");
-            if (Logger::IsDebugEnabled())
-                Logger::Debug("Camera: camera-switch fade-state diagnostics enabled.");
-        }
+        enabled = active;
+        nextVehicleRefresh = 0;
+        manualCameraAllowanceUntil = 0;
+        if (enabled)
+            Logger::Log("[INFO] DisableIdleCamera: idle cinematic camera suppression enabled.");
     }
 
     void Update()
     {
-        if (!removeFadeEnabled || !Logger::IsDebugEnabled())
+        if (!enabled)
             return;
 
-        const std::uint64_t raw = NativeValue(kFirstPersonMode);
-        const bool firstPerson = static_cast<std::uint32_t>(raw) != 0;
+        nativeInit(isPlayerControlOn);
+        nativePush64(0);
+        if (*nativeCall() == 0 || !InvokeBoolean(isGameplayCamRendering))
+            return;
+
         const ULONGLONG now = GetTickCount64();
-
-        if (!hadCameraState)
+        if (now >= nextVehicleRefresh)
         {
-            wasFirstPerson = firstPerson;
-            hadCameraState = true;
-            char message[130] = {};
-            std::snprintf(message, sizeof(message), "Camera: first perspective sample; firstPerson=%s, raw=0x%016llX.",
-                firstPerson ? "true" : "false", static_cast<unsigned long long>(raw));
-            Logger::Debug(message);
-        }
-        else if (firstPerson != wasFirstPerson)
-        {
-            FinishFadeProbe();
-            wasFirstPerson = firstPerson;
-            const bool gameplayCamera = NativeBoolean(kGameplayCameraRendering);
-            const bool playerControl = PlayerHasControl();
-            char message[185] = {};
-            std::snprintf(message, sizeof(message),
-                "Camera: perspective changed; firstPerson=%s, gameplayCamera=%s, playerControl=%s.",
-                firstPerson ? "true" : "false", gameplayCamera ? "true" : "false", playerControl ? "true" : "false");
-            Logger::Debug(message);
-            if (gameplayCamera && playerControl)
-                fadeProbeEnd = now + 350;
+            Invoke(invalidateCinematicVehicleIdleMode);
+            nextVehicleRefresh = now + vehicleRefreshMs;
         }
 
-        if (fadeProbeEnd != 0)
-        {
-            if (now >= fadeProbeEnd)
-            {
-                FinishFadeProbe();
-                return;
-            }
+        LASTINPUTINFO input = { sizeof(input) };
+        if (!GetLastInputInfo(&input))
+            return;
 
-            ++fadeProbeSamples;
-            if (NativeBoolean(kScreenFadedIn)) fadeProbeStates |= 1;
-            if (NativeBoolean(kScreenFadedOut)) fadeProbeStates |= 2;
-            if (NativeBoolean(kScreenFadingIn)) fadeProbeStates |= 4;
-            if (NativeBoolean(kScreenFadingOut)) fadeProbeStates |= 8;
-        }
+        const DWORD inactiveMs = GetTickCount() - input.dwTime;
+        if (inactiveMs < inactiveThresholdMs)
+            return;
+
+        if (ControlPressed(cinematicCameraControl) || ControlPressed(cinematicCameraHoldControl))
+            manualCameraAllowanceUntil = now + manualCameraAllowanceMs;
+
+        if (now < manualCameraAllowanceUntil || InvokeBoolean(isInCinematicMode) ||
+            InvokeBoolean(isCinematicCamRendering))
+            return;
+
+        Invoke(disableCinematicModeThisFrame);
     }
 }

@@ -2,7 +2,5 @@
 
 namespace Main::NativeDiagnostics
 {
-    void Initialize(bool dumpNativeHashes, bool traceCameraNatives);
-    void Update();
-    bool IsCameraTraceActive();
+    void Initialize(bool dumpNativeHashes);
 }

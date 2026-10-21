@@ -9,9 +9,9 @@ namespace GameplayFixes
         bool skipLegal = true;
         bool straightToStoryMode = false;
         bool removeBlackBars = false;
-        bool removeCameraFade = false;
+        bool disableIdleCamera = false;
+        bool disableCameraSmoothing = false;
         bool dumpNativeHashes = false;
-        bool traceCameraNatives = false;
     };
 
     void InitializeEarly();

@@ -1,6 +1,5 @@
 #include "NativeDiagnostics.h"
 #include "../../Headers/Logger.h"
-#include "main.h"
 #include <windows.h>
 #include <cstdint>
 #include <cstdio>
@@ -21,36 +20,13 @@ namespace
         { "CAM::_IS_IN_FULL_FIRST_PERSON_MODE", 0xD1BA66940E94C547ULL },
         { "CAM::IS_GAMEPLAY_CAM_RENDERING", 0x8660EA714834E412ULL },
         { "CAM::IS_FIRST_PERSON_AIM_CAM_ACTIVE", 0xF63134C54B6EC212ULL },
+        { "CAM::IS_FIRST_PERSON_CAMERA_ACTIVE", 0xA24C1D341C6E0D53ULL },
         { "CAM::IS_FOLLOW_VEHICLE_CAM_ACTIVE", 0xA40C2F51FB589E9AULL },
-        { "CAM::DISABLE_FIRST_PERSON_FLASH_EFFECT_THIS_UPDATE", 0x77D65669A05D1A1AULL },
         { "CAM::_IS_IN_CINEMATIC_MODE", 0x74F1D22EFA71FAB8ULL },
         { "CAM::INVALIDATE_CINEMATIC_VEHICLE_IDLE_MODE", 0x634F4A0562CF19B8ULL },
         { "PLAYER::PLAYER_ID", 0x217E9DC48139933DULL },
-        { "PLAYER::IS_PLAYER_CONTROL_ON", 0x7964097FCE4C244BULL },
-        { "CAM::IS_SCREEN_FADED_IN", 0x37F9A426FBCF4AF2ULL },
-        { "CAM::IS_SCREEN_FADED_OUT", 0xF5472C80DF2FF847ULL },
-        { "CAM::IS_SCREEN_FADING_OUT", 0x02F39BEFE7B88D00ULL },
-        { "CAM::IS_SCREEN_FADING_IN", 0x0CECCC63FFA2EF24ULL }
+        { "PLAYER::IS_PLAYER_CONTROL_ON", 0x7964097FCE4C244BULL }
     };
-
-    constexpr std::uint64_t kFirstPersonMode = 0xD1BA66940E94C547ULL;
-    constexpr std::uint64_t kGameplayCameraRendering = 0x8660EA714834E412ULL;
-    constexpr std::uint64_t kPlayerId = 0x217E9DC48139933DULL;
-    constexpr std::uint64_t kPlayerControlOn = 0x7964097FCE4C244BULL;
-    constexpr std::uint64_t kScreenFadedIn = 0x37F9A426FBCF4AF2ULL;
-    constexpr std::uint64_t kScreenFadedOut = 0xF5472C80DF2FF847ULL;
-    constexpr std::uint64_t kScreenFadingOut = 0x02F39BEFE7B88D00ULL;
-    constexpr std::uint64_t kScreenFadingIn = 0x0CECCC63FFA2EF24ULL;
-
-    bool traceEnabled = false;
-    bool initializedPerspective = false;
-    bool previousFirstPerson = false;
-    bool captureActive = false;
-    unsigned int captureCount = 0;
-    unsigned int captureNumber = 0;
-    ULONGLONG captureStart = 0;
-    ULONGLONG nextCaptureSample = 0;
-    bool capturePerspective = false;
 
     bool BuildGamePath(const wchar_t* filename, wchar_t (&path)[MAX_PATH])
     {
@@ -106,26 +82,6 @@ namespace
             success = WriteFile(file, "\r\n", 2, &written, nullptr) && written == 2;
         CloseHandle(file);
         return success;
-    }
-
-    std::uint64_t NativeValue(std::uint64_t hash)
-    {
-        nativeInit(hash);
-        return *nativeCall();
-    }
-
-    bool NativeBoolean(std::uint64_t hash)
-    {
-        return static_cast<std::uint32_t>(NativeValue(hash)) != 0;
-    }
-
-    bool PlayerHasControl()
-    {
-        nativeInit(kPlayerId);
-        const auto player = *nativeCall();
-        nativeInit(kPlayerControlOn);
-        nativePush64(player);
-        return static_cast<std::uint32_t>(*nativeCall()) != 0;
     }
 
     using ResolveNative = void* (__cdecl*)(std::uint64_t);
@@ -273,7 +229,6 @@ namespace
             return;
         }
         WriteDiagnostic(filename, "Handlers are read-only address lookups; no native handler hooks or patches are installed.");
-        WriteDiagnostic(filename, "Note: DISABLE_FIRST_PERSON_FLASH_EFFECT_THIS_UPDATE is documented as a no-op in known RDR2 builds; handler resolution alone does not establish an effective flash fix.");
 
         ResolveNative resolve = FindNativeResolver();
         WriteDiagnostic(filename, resolve ?
@@ -287,115 +242,13 @@ namespace
         Logger::Log("[SUCCESS] NativeDiagnostics: camera native hashes written to GameplayFixesRDR2_NativeDump.log.");
     }
 
-    void CaptureCameraSample(ULONGLONG now)
-    {
-        const bool gameplayCamera = NativeBoolean(kGameplayCameraRendering);
-        const bool playerControl = PlayerHasControl();
-        const bool fadedIn = NativeBoolean(kScreenFadedIn);
-        const bool fadedOut = NativeBoolean(kScreenFadedOut);
-        const bool fadingIn = NativeBoolean(kScreenFadingIn);
-        const bool fadingOut = NativeBoolean(kScreenFadingOut);
-
-        char message[280] = {};
-        std::snprintf(message, sizeof(message),
-            "capture=%u elapsed=%llums firstPerson=%u gameplayCam=%u playerControl=%u fadedIn=%u fadedOut=%u fadingIn=%u fadingOut=%u",
-            captureNumber, static_cast<unsigned long long>(now - captureStart),
-            capturePerspective ? 1U : 0U, gameplayCamera ? 1U : 0U, playerControl ? 1U : 0U,
-            fadedIn ? 1U : 0U, fadedOut ? 1U : 0U, fadingIn ? 1U : 0U, fadingOut ? 1U : 0U);
-        WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log", message);
-    }
 }
 
 namespace Main::NativeDiagnostics
 {
-    bool IsCameraTraceActive()
+    void Initialize(bool dumpNativeHashes)
     {
-        return traceEnabled;
-    }
-
-    void Initialize(bool dumpNativeHashes, bool traceCameraNatives)
-    {
-        traceEnabled = traceCameraNatives;
-        initializedPerspective = false;
-        previousFirstPerson = false;
-        captureActive = false;
-        captureCount = 0;
-        captureNumber = 0;
-        captureStart = 0;
-        nextCaptureSample = 0;
-        capturePerspective = false;
-
         if (dumpNativeHashes)
             DumpCameraHashes();
-
-        if (traceEnabled)
-        {
-            if (WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log",
-                "Camera native-value capture started. Samples come from this mod's read-only native probes; this is not a global native-call hook.", true))
-            {
-                WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log",
-                    "Trace samples: CAM::_IS_IN_FULL_FIRST_PERSON_MODE, CAM::IS_GAMEPLAY_CAM_RENDERING, PLAYER::PLAYER_ID, PLAYER::IS_PLAYER_CONTROL_ON, and four CAM screen-fade-state natives.");
-                WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log",
-                    "Each perspective switch captures approximately 400ms; the trace is capped at 24 switches per session.");
-                Logger::Log("[SUCCESS] NativeDiagnostics: camera tracing enabled; writing GameplayFixesRDR2_CameraTrace.log.");
-            }
-            else
-            {
-                traceEnabled = false;
-                Logger::Log("[WARNING] NativeDiagnostics: camera trace log could not be created in the game directory.");
-            }
-        }
-    }
-
-    void Update()
-    {
-        if (!traceEnabled)
-            return;
-
-        const bool firstPerson = NativeBoolean(kFirstPersonMode);
-        const ULONGLONG now = GetTickCount64();
-        if (!initializedPerspective)
-        {
-            initializedPerspective = true;
-            previousFirstPerson = firstPerson;
-            WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log",
-                firstPerson ? "Initial perspective: firstPerson=1." : "Initial perspective: firstPerson=0.");
-        }
-        else if (firstPerson != previousFirstPerson)
-        {
-            previousFirstPerson = firstPerson;
-            if (captureActive)
-            {
-                WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log", "Previous capture interrupted by another perspective change.");
-                captureActive = false;
-            }
-            if (captureCount < 24)
-            {
-                captureStart = now;
-                nextCaptureSample = now;
-                capturePerspective = firstPerson;
-                captureActive = true;
-                captureNumber = ++captureCount;
-                WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log",
-                    firstPerson ? "Perspective transition: third-person -> first-person." :
-                                  "Perspective transition: first-person -> third-person.");
-            }
-        }
-
-        if (captureActive && now >= nextCaptureSample)
-        {
-            CaptureCameraSample(now);
-            nextCaptureSample = now + 50;
-            if (now - captureStart >= 400)
-            {
-                captureActive = false;
-                WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log", "Capture completed.");
-                if (captureCount == 24)
-                {
-                    traceEnabled = false;
-                    WriteDiagnostic(L"GameplayFixesRDR2_CameraTrace.log", "Trace stopped after 24 perspective changes.");
-                }
-            }
-        }
     }
 }

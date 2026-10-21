@@ -1,7 +1,6 @@
 #include "GameplayFixes.h"
 #include "../Headers/Logger.h"
 #include "Main/Headers/Modules.h"
-#include "Main/Headers/NativeDiagnostics.h"
 #include <windows.h>
 #include <string>
 
@@ -88,43 +87,46 @@ namespace
         if (existing[0] == L'\0')
             success = WriteIniValue(path, L"Visual", L"RemoveBlackBars", L"false", "Visual.RemoveBlackBars") && success;
 
-        wchar_t previousCameraFade[16] = {};
-        GetPrivateProfileStringW(L"Camera", L"RemoveCameraFade", L"", previousCameraFade, 16, path.c_str());
-        existing[0] = L'\0';
-        GetPrivateProfileStringW(L"Visual", L"RemoveCameraFade", L"", existing, 8, path.c_str());
-        bool visualCameraFadeReady = existing[0] != L'\0';
-        if (!visualCameraFadeReady)
+        const wchar_t* obsoleteCameraSettings[][2] =
         {
-            const wchar_t* value = previousCameraFade[0] == L'\0' ? L"false" :
-                ReadIniBoolean(path, L"Camera", L"RemoveCameraFade", false) ? L"true" : L"false";
-            visualCameraFadeReady = WriteIniValue(path, L"Visual", L"RemoveCameraFade", value, "Visual.RemoveCameraFade");
-            success = visualCameraFadeReady && success;
-        }
-        if (visualCameraFadeReady && previousCameraFade[0] != L'\0')
+            { L"Visual", L"RemoveCameraFade" },
+            { L"Camera", L"RemoveCameraFade" },
+            { L"Diagnostics", L"TraceCameraNatives" }
+        };
+        for (const auto& option : obsoleteCameraSettings)
         {
-            if (WritePrivateProfileStringW(L"Camera", L"RemoveCameraFade", nullptr, path.c_str()))
+            wchar_t previous[16] = {};
+            GetPrivateProfileStringW(option[0], option[1], L"__missing__", previous, 16, path.c_str());
+            if (CompareStringOrdinal(previous, -1, L"__missing__", -1, TRUE) == CSTR_EQUAL)
+                continue;
+
+            if (WritePrivateProfileStringW(option[0], option[1], nullptr, path.c_str()))
             {
                 wchar_t remaining[256] = {};
-                if (GetPrivateProfileSectionW(L"Camera", remaining, 256, path.c_str()) == 0)
-                    WritePrivateProfileStringW(L"Camera", nullptr, nullptr, path.c_str());
-                Logger::Log("[SUCCESS] INI: moved RemoveCameraFade from Camera to Visual.");
+                if (GetPrivateProfileSectionW(option[0], remaining, 256, path.c_str()) == 0)
+                    WritePrivateProfileStringW(option[0], nullptr, nullptr, path.c_str());
             }
             else
             {
-                Logger::Log("[WARNING] INI: could not remove obsolete Camera.RemoveCameraFade setting.");
+                Logger::Log("[WARNING] INI: obsolete camera setting could not be removed.");
                 success = false;
             }
         }
 
         existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Visual", L"DisableIdleCamera", L"", existing, 8, path.c_str());
+        if (existing[0] == L'\0')
+            success = WriteIniValue(path, L"Visual", L"DisableIdleCamera", L"false", "Visual.DisableIdleCamera") && success;
+
+        existing[0] = L'\0';
+        GetPrivateProfileStringW(L"Visual", L"DisableCameraSmoothing", L"", existing, 8, path.c_str());
+        if (existing[0] == L'\0')
+            success = WriteIniValue(path, L"Visual", L"DisableCameraSmoothing", L"false", "Visual.DisableCameraSmoothing") && success;
+
+        existing[0] = L'\0';
         GetPrivateProfileStringW(L"Diagnostics", L"DumpNativeHashes", L"", existing, 8, path.c_str());
         if (existing[0] == L'\0')
             success = WriteIniValue(path, L"Diagnostics", L"DumpNativeHashes", L"false", "Diagnostics.DumpNativeHashes") && success;
-
-        existing[0] = L'\0';
-        GetPrivateProfileStringW(L"Diagnostics", L"TraceCameraNatives", L"", existing, 8, path.c_str());
-        if (existing[0] == L'\0')
-            success = WriteIniValue(path, L"Diagnostics", L"TraceCameraNatives", L"false", "Diagnostics.TraceCameraNatives") && success;
 
         wchar_t obsoleteInterval[16] = {};
         GetPrivateProfileStringW(L"General", L"UpdateIntervalMs", L"__missing__", obsoleteInterval, 16, path.c_str());
@@ -234,9 +236,9 @@ namespace GameplayFixes
             settings.skipLegal = ReadIniBoolean(iniPath, L"Startup", L"SkipLegal", true);
             settings.straightToStoryMode = ReadIniBoolean(iniPath, L"Startup", L"StraightToStoryMode", false);
             settings.removeBlackBars = ReadIniBoolean(iniPath, L"Visual", L"RemoveBlackBars", false);
-            settings.removeCameraFade = ReadIniBoolean(iniPath, L"Visual", L"RemoveCameraFade", false);
+            settings.disableIdleCamera = ReadIniBoolean(iniPath, L"Visual", L"DisableIdleCamera", false);
+            settings.disableCameraSmoothing = ReadIniBoolean(iniPath, L"Visual", L"DisableCameraSmoothing", false);
             settings.dumpNativeHashes = ReadIniBoolean(iniPath, L"Diagnostics", L"DumpNativeHashes", false);
-            settings.traceCameraNatives = ReadIniBoolean(iniPath, L"Diagnostics", L"TraceCameraNatives", false);
             Logger::Log(iniReady ? "[SUCCESS] INI: configuration settings read." :
                 "[WARNING] INI: settings read attempted with configuration errors; defaults may be in use.");
         }
@@ -249,9 +251,10 @@ namespace GameplayFixes
             ", SkipLegal=" + (settings.skipLegal ? "true" : "false") +
             ", StraightToStoryMode=" + (settings.straightToStoryMode ? "true" : "false") +
             ", RemoveBlackBars=" + (settings.removeBlackBars ? "true" : "false") +
-            ", RemoveCameraFade=" + (settings.removeCameraFade ? "true" : "false") +
+            ", DisableIdleCamera=" + (settings.disableIdleCamera ? "true" : "false") +
+            ", DisableCameraSmoothing=" + (settings.disableCameraSmoothing ? "true" : "false") +
             ", DumpNativeHashes=" + (settings.dumpNativeHashes ? "true" : "false") +
-            ", TraceCameraNatives=" + (settings.traceCameraNatives ? "true" : "false") + ".").c_str());
+            ".").c_str());
         Main::InitializeEarly(settings);
         Logger::Log("[SUCCESS] Early startup: pre-Story-Mode initialization completed.");
         return TRUE;
@@ -279,7 +282,6 @@ namespace GameplayFixes
 
     unsigned int GetUpdateDelay()
     {
-        return settings.enabled && (Main::NativeDiagnostics::IsCameraTraceActive() ||
-            (settings.removeCameraFade && Logger::IsDebugEnabled())) ? 16U : 250U;
+        return settings.enabled && settings.disableIdleCamera ? 0U : 250U;
     }
 }

@@ -3,6 +3,7 @@
 #include "SkipIntro.h"
 #include "RemoveBlackBars.h"
 #include "Camera.h"
+#include "CameraSmoothing.h"
 #include "NativeDiagnostics.h"
 
 namespace Main
@@ -11,22 +12,20 @@ namespace Main
     {
         SkipIntro::Initialize(settings.enabled && settings.skipIntroSplashes,
             settings.enabled && settings.skipLegal, settings.enabled && settings.straightToStoryMode);
+        CameraSmoothing::InitializeEarly(settings.enabled && settings.disableCameraSmoothing);
     }
 
     void Initialize(const GameplayFixes::Settings& settings)
     {
         SkipIntro::FinishStartup();
         RemoveBlackBars::Initialize(settings.enabled && settings.removeBlackBars);
-        Camera::Initialize(settings.enabled && settings.removeCameraFade);
-        NativeDiagnostics::Initialize(settings.enabled && settings.dumpNativeHashes,
-            settings.enabled && settings.traceCameraNatives);
+        Camera::Initialize(settings.enabled && settings.disableIdleCamera);
+        CameraSmoothing::Initialize(settings.enabled && settings.disableCameraSmoothing);
+        NativeDiagnostics::Initialize(settings.enabled && settings.dumpNativeHashes);
     }
 
-    void Update(const GameplayFixes::Settings& settings)
+    void Update(const GameplayFixes::Settings&)
     {
-        if (settings.removeCameraFade)
-            Camera::Update();
-        if (settings.traceCameraNatives)
-            NativeDiagnostics::Update();
+        Camera::Update();
     }
 }
