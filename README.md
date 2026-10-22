@@ -13,9 +13,9 @@ A collection of various gameplay fixes and improvements for RDR2.
 - DisableIdleCamera
 - ReduceCameraShake
 - ReduceCameraSway
+- DisableHeadBob
 - ReduceWeaponRecoil (adjustable)
 - ReduceFirstPersonWeaponRecoil (adjustable)
-- DisableHeadBob
 - DisableVignette
 - DisableBloom
 - DisableDisableDrunkFilter
