@@ -1,83 +1,108 @@
-RDR2 GAMEPLAY FIXES LICENSE
+# RDR2 FUSION FIX LICENSE
 
 Copyright (c) 2026 Nochala
 All rights reserved.
 
-This license applies to the mod created by Nochala under the name "RDR2 Gameplay Fixes" and any of the following alternate names:
+This license applies to the modification created by Nochala under the name **"RDR2 Fusion Fix"**, including the following alternate names:
 
-- Gameplay Fixes RDR2
-- GameplayFixesRDR2
-- Gameplay Fixes for RDR2
-- Red Dead Redemption 2 Gameplay Fixes
-- Gameplay Fixes for Red Dead Redemption 2
+- RDR2 Fusion Fix
+- RDR2 Fusion Fixes
+- RDR2FusionFix
+- RDR2FusionFixes
+- Red Dead Redemption 2 Fusion Fix
+- Red Dead Redemption 2 Fusion Fixes
 
-These names identify the same project for purposes of this license. The license also applies if Nochala later renames this project. In this document, the project and its original source code, compiled ASI files, configuration files, documentation, and other original materials are collectively referred to as the "Software."
+All names listed above refer to the same project authored by Nochala. This license remains applicable if the project is renamed, rebranded, updated, or released under another name by its original author. These naming provisions do not extend this license to unrelated projects that happen to use similar names.
 
-1. PERMITTED USE
+Throughout this document, the project and its original source code, compiled ASI files, configuration files, documentation, and other original materials are collectively referred to as the "Software."
+
+## 1. PERMITTED USE
 
 You may:
 
 - Download, install, and use the Software for personal, non-commercial purposes.
-- View and study the publicly available source code.
+- View, inspect, and study the publicly available source code.
 - Compile the source code for personal, non-commercial use.
-- Modify the source code privately for personal, non-commercial use, provided the modified versions are not publicly distributed without prior written permission.
+- Modify the source code privately for personal, non-commercial use, provided modified versions are not publicly distributed without prior written permission.
 
-These permissions are limited and do not transfer ownership of the Software or grant any rights not expressly stated here.
+These permissions are limited and do not transfer ownership of the Software or grant any rights not expressly stated in this license.
 
-2. RESTRICTIONS
+## 2. RESTRICTIONS
 
 Without prior written permission from Nochala, you may NOT:
 
-- Sell, sublicense, monetize, or otherwise commercially exploit the Software or any part of it.
+- Sell, sublicense, monetize, or otherwise commercially exploit the Software or any portion of it.
 - Distribute the Software through paid downloads, early-access paywalls, subscription-locked releases, Patreon-locked builds, paid mod packs, or ad-revenue-based redistribution.
-- Reupload, mirror, or publicly redistribute the Software, whether modified or unmodified, on any website, repository, service, or other platform.
-- Include the Software or any part of its source code or compiled files in public mod packs, collections, installers, or bundles.
+- Reupload, mirror, or publicly redistribute the Software, whether modified or unmodified, on any website, repository, service, or platform.
+- Include the Software, its source code, or compiled files in publicly distributed mod packs, collections, installers, or bundles.
 - Publish or distribute modified versions, forks, ports, adaptations, or other derivative works based on the Software.
+- Incorporate copyrighted portions of the Software into another publicly distributed project without permission.
 - Claim the Software, its source code, or any portion authored by Nochala as your own work.
 - Remove, obscure, replace, or misrepresent copyright notices, license terms, or author attribution.
 
-Making the source code publicly viewable does not grant permission to republish, redistribute, or commercially use it.
+Public availability of the source code does not constitute permission to redistribute, republish, or commercially exploit the Software.
 
-3. AUTHORSHIP AND ATTRIBUTION
+## 3. AUTHORSHIP AND ATTRIBUTION
 
-The original author of the Software is:
+The original author and copyright holder of the Software is:
 
-Nochala
+**Nochala**
 
-All copies and privately modified versions must preserve the original copyright, license, and attribution notices. Permission to examine, compile, or privately modify the Software does not authorize anyone to present the original work as their own or publicly distribute modifications.
+All copies and privately modified versions must preserve the original copyright, license, and attribution notices.
 
-4. THIRD-PARTY SOFTWARE AND INTELLECTUAL PROPERTY
+Permission to examine, compile, or privately modify the Software does not authorize anyone to claim authorship of the original work or publicly distribute modifications.
 
-The Software may interact with or depend on Red Dead Redemption 2, ScriptHookRDR2, third-party libraries, APIs, and other tools or game assets.
+Rebranding, renaming, or modifying the Software does not remove or supersede the original author's copyright or attribution rights.
 
-This license covers only original code and materials authored by Nochala. It does not grant ownership of, or additional rights to, third-party software, game content, trademarks, or other intellectual property. Any applicable third-party licenses and terms remain in effect.
+## 4. THIRD-PARTY SOFTWARE AND INTELLECTUAL PROPERTY
 
-Red Dead Redemption 2, Rockstar Games, Rockstar North, Take-Two Interactive, and related names, trademarks, and intellectual property belong to their respective owners.
+The Software may interact with or depend on Red Dead Redemption 2, ScriptHookRDR2, third-party libraries, APIs, and other software, tools, or game assets.
 
-This is an unofficial fan-made modification and is not affiliated with, endorsed by, or sponsored by Rockstar Games or Take-Two Interactive.
+This license applies exclusively to original code and materials authored by Nochala. It does not grant ownership of, or additional rights to, third-party software, game content, trademarks, or other intellectual property.
 
-5. DISCLAIMER OF WARRANTY AND LIABILITY
+All applicable third-party licenses, copyright notices, and terms remain in effect.
+
+Red Dead Redemption 2, Rockstar Games, Rockstar North, Take-Two Interactive, and their associated trademarks and intellectual property belong to their respective owners.
+
+RDR2 Fusion Fix is an unofficial, independently developed fan modification. It is not affiliated with, endorsed by, sponsored by, or officially associated with Rockstar Games or Take-Two Interactive.
+
+## 5. DISCLAIMER OF WARRANTY AND LIABILITY
 
 THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
 
-To the maximum extent permitted by applicable law, Nochala shall not be liable for crashes, data loss, corrupted saves, incompatibilities, game instability, account issues, or other damages arising from installing, compiling, modifying, or using the Software.
+To the maximum extent permitted by applicable law, Nochala shall not be liable for crashes, data loss, corrupted saves, incompatibilities, game instability, account issues, or any other direct or indirect damages arising from installing, compiling, modifying, distributing, or using the Software.
 
-You use the Software at your own risk.
+The Software is provided without any guarantee of compatibility, reliability, performance, or continued functionality.
 
-6. PERMISSION REQUESTS
+**You use the Software entirely at your own risk.**
 
-Prior written permission from Nochala is required for public redistribution, publication of modified versions or forks, inclusion in publicly distributed bundles or mod packs, commercial use, or any other use not expressly permitted above.
+## 6. PERMISSION REQUESTS
 
-Author: Nochala
+Prior written permission from Nochala is required for:
+
+- Public redistribution or rehosting of the Software.
+- Publication of modified versions, forks, ports, or derivative works.
+- Inclusion in publicly distributed mod packs, installers, or bundles.
+- Commercial use, monetization, or paid distribution.
+- Incorporation of copyrighted portions into other publicly distributed projects.
+- Any other use not expressly permitted under this license.
+
+**Author:** Nochala
 
 Permission is not implied merely because the Software or its source code is publicly accessible.
 
-PLAIN-ENGLISH SUMMARY
+Any permission granted must be expressly authorized by Nochala in writing.
 
-You may download, install, use, study, and privately compile or modify this mod for non-commercial purposes.
+---
 
-You may not make money from it, claim it as your own, reupload it, include it in public mod packs, or release modified versions without prior written permission from Nochala.
+## PLAIN-ENGLISH SUMMARY
 
-Always preserve credit to Nochala.
+You may download, install, use, study, privately compile, and privately modify RDR2 Fusion Fix for non-commercial purposes.
 
-This summary is for convenience; the numbered terms above control if there is any inconsistency.
+You may not sell it, monetize it, reupload it, redistribute it, include it in public mod packs, claim it as your own, or release modified versions without prior written permission from Nochala.
+
+All original copyright and attribution notices must remain intact.
+
+This license continues to apply if RDR2 Fusion Fix is renamed or rebranded by Nochala, including releases under its previous Gameplay Fixes names.
+
+**This summary is provided for convenience. The numbered license terms above take precedence if any inconsistency exists.**
