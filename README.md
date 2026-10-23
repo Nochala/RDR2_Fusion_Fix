@@ -6,12 +6,22 @@ This eventually aims to be a huge collection of various gameplay fixes and impro
 
 ### Current features in development
 
-### [Engine]
-
 ### [ Startup ]
 - SkipIntroSplashes
 - SkipLegal
 - StraightToStoryMode
+  
+### [Engine]
+- YTDCrashFix=true
+- ExtendStreamingPools=true
+- FixHighFPSPhysics=false
+- FixHighFPSStamina=false
+- FixHighFPSFishing=false
+- FixHighFPSDeadEye=false
+- FixStreamingStutter=false
+- FixTexturePopIn=false
+- FixFramePacing=false
+- FixVRAMLeak=false
 
 ### [ Visual ]
 - RemoveBlackBars
@@ -30,3 +40,4 @@ This eventually aims to be a huge collection of various gameplay fixes and impro
 - ReduceWeaponRecoil (adjustable) - Experimental...
 - ReduceFirstPersonWeaponRecoil (adjustable) Experimental...
 
+etc.
