@@ -1,7 +1,9 @@
-# RedDeadRedemption2_Gameplay_Fixes
+# RedDeadRedemption2 Fusion Fix
 A collection of various gameplay fixes and improvements for RDR2.
 
 ### Current features in development
+
+### [Engine]
 
 ### [ Startup ]
 - SkipIntroSplashes
