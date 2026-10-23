@@ -1,9 +1,9 @@
-# RDR2 FUSION FIX LICENSE
+RDR2 FUSION FIX LICENSE
 
 Copyright (c) 2026 Nochala
 All rights reserved.
 
-This license applies to the modification created by Nochala under the name **"RDR2 Fusion Fix"**, including the following alternate names:
+This license applies to the modification created by Nochala under the name "RDR2 Fusion Fix", including the following alternate names:
 
 - RDR2 Fusion Fix
 - RDR2 Fusion Fixes
@@ -16,7 +16,7 @@ All names listed above refer to the same project authored by Nochala. This licen
 
 Throughout this document, the project and its original source code, compiled ASI files, configuration files, documentation, and other original materials are collectively referred to as the "Software."
 
-## 1. PERMITTED USE
+1. PERMITTED USE
 
 You may:
 
@@ -27,7 +27,7 @@ You may:
 
 These permissions are limited and do not transfer ownership of the Software or grant any rights not expressly stated in this license.
 
-## 2. RESTRICTIONS
+2. RESTRICTIONS
 
 Without prior written permission from Nochala, you may NOT:
 
@@ -42,11 +42,11 @@ Without prior written permission from Nochala, you may NOT:
 
 Public availability of the source code does not constitute permission to redistribute, republish, or commercially exploit the Software.
 
-## 3. AUTHORSHIP AND ATTRIBUTION
+3. AUTHORSHIP AND ATTRIBUTION
 
 The original author and copyright holder of the Software is:
 
-**Nochala**
+Nochala
 
 All copies and privately modified versions must preserve the original copyright, license, and attribution notices.
 
@@ -54,7 +54,7 @@ Permission to examine, compile, or privately modify the Software does not author
 
 Rebranding, renaming, or modifying the Software does not remove or supersede the original author's copyright or attribution rights.
 
-## 4. THIRD-PARTY SOFTWARE AND INTELLECTUAL PROPERTY
+4. THIRD-PARTY SOFTWARE AND INTELLECTUAL PROPERTY
 
 The Software may interact with or depend on Red Dead Redemption 2, ScriptHookRDR2, third-party libraries, APIs, and other software, tools, or game assets.
 
@@ -66,7 +66,7 @@ Red Dead Redemption 2, Rockstar Games, Rockstar North, Take-Two Interactive, and
 
 RDR2 Fusion Fix is an unofficial, independently developed fan modification. It is not affiliated with, endorsed by, sponsored by, or officially associated with Rockstar Games or Take-Two Interactive.
 
-## 5. DISCLAIMER OF WARRANTY AND LIABILITY
+5. DISCLAIMER OF WARRANTY AND LIABILITY
 
 THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
 
@@ -74,9 +74,9 @@ To the maximum extent permitted by applicable law, Nochala shall not be liable f
 
 The Software is provided without any guarantee of compatibility, reliability, performance, or continued functionality.
 
-**You use the Software entirely at your own risk.**
+You use the Software entirely at your own risk.
 
-## 6. PERMISSION REQUESTS
+6. PERMISSION REQUESTS
 
 Prior written permission from Nochala is required for:
 
@@ -87,7 +87,7 @@ Prior written permission from Nochala is required for:
 - Incorporation of copyrighted portions into other publicly distributed projects.
 - Any other use not expressly permitted under this license.
 
-**Author:** Nochala
+Author: Nochala
 
 Permission is not implied merely because the Software or its source code is publicly accessible.
 
@@ -95,7 +95,7 @@ Any permission granted must be expressly authorized by Nochala in writing.
 
 ---
 
-## PLAIN-ENGLISH SUMMARY
+PLAIN-ENGLISH SUMMARY
 
 You may download, install, use, study, privately compile, and privately modify RDR2 Fusion Fix for non-commercial purposes.
 
@@ -105,4 +105,4 @@ All original copyright and attribution notices must remain intact.
 
 This license continues to apply if RDR2 Fusion Fix is renamed or rebranded by Nochala, including releases under its previous Gameplay Fixes names.
 
-**This summary is provided for convenience. The numbered license terms above take precedence if any inconsistency exists.**
+This summary is provided for convenience. The numbered license terms above take precedence if any inconsistency exists.
