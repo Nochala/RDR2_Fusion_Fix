@@ -18,10 +18,6 @@ This eventually aims to be a huge collection of various gameplay fixes and impro
 - FixHighFPSStamina=false
 - FixHighFPSFishing=false
 - FixHighFPSDeadEye=false
-- FixStreamingStutter=false
-- FixTexturePopIn=false
-- FixFramePacing=false
-- FixVRAMLeak=false
 
 ### [ Visual ]
 - RemoveBlackBars
