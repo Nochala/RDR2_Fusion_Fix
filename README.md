@@ -4,36 +4,4 @@ This eventually aims to be a huge collection of various gameplay fixes and impro
 
 
 
-### Current features in development
-
-### [ Startup ]
-- SkipIntroSplashes
-- SkipLegal
-- StraightToStoryMode
-  
-### [Engine]
-- YTDCrashFix=true
-- ExtendStreamingPools=true
-- FixHighFPSPhysics=false
-- FixHighFPSStamina=false
-- FixHighFPSFishing=false
-- FixHighFPSDeadEye=false
-
-### [ Visual ]
-- RemoveBlackBars
-- DisableIdleCamera
-- ReduceCameraShake
-- ReduceCameraSway
-- DisableHeadBob
-- DisableDisableDrunkFilter
-- DisableEagleEyeFilter
-- DisableDeadEyeFilter
-- DisablePauseMenuFilter
-- DisableWeaponWheelFilter
-- DisableLowHealthFilter
-- DisableVignette - excluded for now...
-- DisableBloom - excluded for now... 
-- ReduceWeaponRecoil (adjustable) - Experimental...
-- ReduceFirstPersonWeaponRecoil (adjustable) Experimental...
-
-etc.
+### Currently in major development.
